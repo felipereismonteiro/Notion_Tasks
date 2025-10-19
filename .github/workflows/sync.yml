@@ -1,0 +1,31 @@
+name: Sync Notion
+
+on:
+  schedule:
+    # roda todo dia às 22h UTC−3 (Brasil). 22h BRT = 01h UTC do dia seguinte
+    - cron: "0 1 * * *"
+  workflow_dispatch:   # permite rodar manualmente se quiser
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.yml
+
+      - name: Run sync script
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATABASE_ID: ${{ secrets.DATABASE_ID }}
+          USER_ID: ${{ secrets.HABITICA_USER_ID }}
+          API_KEY: ${{ secrets.HABITICA_API_KEY }}
+        run: |
+          python main.py
