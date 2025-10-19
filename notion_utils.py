@@ -88,3 +88,27 @@ def get_tasks(database_id, notion_token, filters=None, page_size=100):
         }
         for t in all_results
     ]
+
+def complete_task(task_id, notion_token):
+    """
+    Marca a task como completa no Notion.
+    """
+    url = f"https://api.notion.com/v1/pages/{task_id}"
+    headers = {
+        "Authorization": f"Bearer {notion_token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
+    payload = {
+        "properties": {
+            "✅ Status": {
+                "checkbox": True
+            }
+        }
+    }
+    response = requests.patch(url, headers=headers, json=payload)
+    if response.status_code != 200:
+        print("Erro ao atualizar tarefa no Notion:", response.status_code, response.text)
+        return False
+    return True
