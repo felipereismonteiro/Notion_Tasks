@@ -19,7 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.yml
+          pip install -r requirements.txt
 
       - name: Run sync script
         env:
