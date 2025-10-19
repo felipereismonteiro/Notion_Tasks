@@ -19,17 +19,17 @@ if missing:
 else:
     print("✅ Todas as variáveis de ambiente foram carregadas corretamente.")
 
-headers = {
-    "Authorization": f"Bearer {NOTION_TOKEN}",
-    "Content-Type": "application/json",
-    "Notion-Version": "2022-06-28"
-}
-
-def get_tasks(database_id, filters=None, page_size=100, headers=None):
+def get_tasks(database_id, notion_token, filters=None, page_size=100):
     """
     Retorna todas as tasks da database do Notion aplicando o filtro fornecido.
     Faz paginação automática até trazer todas as páginas.
     """
+    headers = {
+        "Authorization": f"Bearer {notion_token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
     url = f"https://api.notion.com/v1/databases/{database_id}/query"
     all_results = []
     payload = {"page_size": page_size}
@@ -78,4 +78,13 @@ def get_tasks(database_id, filters=None, page_size=100, headers=None):
         next_cursor = data.get("next_cursor")
 
     print(f"Total de tasks encontradas: {len(all_results)}")
-    return all_results
+    return [
+        {
+            "id": t["id"],
+            "nome": t["properties"]["🐈 Sistema"]["title"][0]["text"]["content"],
+            "Descricao": t["properties"]["🍀 Descrição"]["rich_text"][0]["text"]["content"] if t["properties"]["🍀 Descrição"]["rich_text"] else "",
+            "status": t["properties"]["✅ Status"]["checkbox"],
+            "deadline": t["properties"]["📅 Deadline"]["date"]["start"] if t["properties"]["📅 Deadline"]["date"] else None
+        }
+        for t in all_results
+    ]
