@@ -23,6 +23,7 @@ else:
     print("✅ Todas as variáveis de ambiente foram carregadas corretamente.")
 
 tasks = get_tasks(DATABASE_ID, NOTION_TOKEN)
+print("----------------------------------------")
 print("Tarefas pendentes no Notion para hoje:")
 for task in tasks:
     print(f"- {task['nome']} (ID: {task['id']})")
@@ -34,8 +35,6 @@ print("Sincronizando tarefas completadas do Habitica com o Notion...")
 for task in completed_tasks:
     if len(task.get("history")) < 1:
         continue
-
-    print(f"- {task['text']} (ID: {task['id']}) - Histórico: {task.get('history')}")
 
     if task["text"] == "Limpo":
         for notion_task in tasks:
