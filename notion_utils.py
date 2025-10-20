@@ -66,8 +66,6 @@ def get_tasks(database_id, notion_token, filters=None, page_size=100):
         if next_cursor:
             payload["start_cursor"] = next_cursor
 
-        print(f"Consultando Tarefas do Notion")
-
         response = requests.post(url, headers=headers_to_use, json=payload)
         if response.status_code != 200:
             print("Erro ao consultar Notion:", response.status_code, response.text)
@@ -78,7 +76,6 @@ def get_tasks(database_id, notion_token, filters=None, page_size=100):
         has_more = data.get("has_more", False)
         next_cursor = data.get("next_cursor")
 
-    print(f"Total de tasks encontradas: {len(all_results)}")
     return [
         {
             "id": t["id"],

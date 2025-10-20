@@ -27,18 +27,35 @@ tasks = get_tasks(DATABASE_ID, NOTION_TOKEN)
 print("Tarefas pendentes no Notion para hoje:")
 for task in tasks:
     print(f"- {task['nome']} (ID: {task['id']})")
-completed_tasks = get_completed_habits().get("data")
+completed_tasks = get_completed_habits()
+print(F"COMPLETED TASKS {completed_tasks}")
 print("----------------------------------------")
 
 print("Sincronizando tarefas completadas do Habitica com o Notion...")
 
 for task in completed_tasks:
+    if task.get('type') == 'todo' and task.get('completed'):
+        task_founded = get_tasks(DATABASE_ID, NOTION_TOKEN,
+                filters = {
+                "property": "🐈 Sistema",
+                "title": {"contains": task.get("text")}
+            }
+        )
+        response = complete_task(sorted(task_founded, key=lambda t: t["deadline"] or "", reverse=True)[0]["id"], NOTION_TOKEN)
+        if response:
+            print(f"Tarefa '{task.get('text')}' marcada como completa no Notion ✅")
+        else :
+            print(f"Tarefa '{task.get('text')}' não encontrada no Notion ❌")
+            print(f"Resposta do Notion: {response}")
+
+        continue
+
     if len(task.get("history")) < 1:
         continue
 
     if task["text"] == "Limpo":
         for notion_task in tasks:
-            if 'pornografia' in notion_task.get('nome', '').lower():
+            if 'dia' in notion_task.get('nome', '').lower() or 'sem' in notion_task.get('nome', '').lower():
                 complete_task(notion_task['id'], NOTION_TOKEN)
                 print(f"Tarefa '{notion_task['nome']}' marcada como completa no Notion ✅")
 
