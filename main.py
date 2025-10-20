@@ -55,7 +55,7 @@ for task in completed_tasks:
 
     if task["text"] == "Limpo":
         for notion_task in tasks:
-            if 'Dia' in notion_task.get('nome', '').lower() or 'sem' in notion_task.get('nome', '').lower():
+            if 'dia' in notion_task.get('nome', '').lower() or 'sem' in notion_task.get('nome', '').lower():
                 complete_task(notion_task['id'], NOTION_TOKEN)
                 print(f"Tarefa '{notion_task['nome']}' marcada como completa no Notion ✅")
 
