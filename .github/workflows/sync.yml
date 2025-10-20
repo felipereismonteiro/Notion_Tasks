@@ -28,4 +28,11 @@ jobs:
           USER_ID: ${{ secrets.USER_ID }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          python main.py
+          python - <<'PY'
+          from datetime import datetime
+          import os, sys, subprocess
+          from zoneinfo import ZoneInfo
+          print("UTC now: ", datetime.utcnow().isoformat())
+          print("BRT now: ", datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
+          sys.exit(subprocess.call(["python", "main.py"]))
+          PY
