@@ -36,8 +36,6 @@ for task in completed_tasks:
     if len(task.get("history")) < 1:
         continue
 
-    print(f"- {task['text']} (ID: {task['id']}) - Histórico: {task.get('history')}")
-
     if task["text"] == "Limpo":
         for notion_task in tasks:
             if 'pornografia' in notion_task.get('nome', '').lower():
