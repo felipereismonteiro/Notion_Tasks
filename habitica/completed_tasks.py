@@ -30,9 +30,19 @@ def get_completed_habits():
         "x-client": f"{USER_ID}-meuscripts"
     }
 
-    response = requests.get("https://habitica.com/api/v3/tasks/user?type=dailys", headers=headers)
-    if response.status_code == 200:
-        return response.json()
+    url_dailys = "https://habitica.com/api/v3/tasks/user?type=dailys"
+    url_todos = "https://habitica.com/api/v3/tasks/user?type=completedTodos"
+
+    response_dailys = requests.get(url_dailys, headers=headers)
+    response_todos = requests.get(url_todos, headers=headers)
+
+    if response_dailys.status_code == 200 and response_todos.status_code == 200:
+        dailys = response_dailys.json().get("data", [])
+        todos = response_todos.json().get("data", [])
+        return dailys + todos
     else:
-        print(f"Erro ao buscar hábitos: {response.text}")
-        return None
+        print(f"Erro ao buscar tarefas:")
+        print(f"  Dailys: {response_dailys.status_code} -> {response_dailys.text}")
+        print(f"  Todos: {response_todos.status_code} -> {response_todos.text}")
+        return []
+
