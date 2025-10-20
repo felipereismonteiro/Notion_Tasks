@@ -29,7 +29,6 @@ for task in tasks:
     print(f"- {task['nome']} (ID: {task['id']})")
 completed_tasks = get_completed_habits()
 print(F"COMPLETED TASKS {completed_tasks}")
-print(F"QUANTIDADE {len(completed_tasks)}")
 print("----------------------------------------")
 
 print("Sincronizando tarefas completadas do Habitica com o Notion...")
@@ -56,7 +55,7 @@ for task in completed_tasks:
 
     if task["text"] == "Limpo":
         for notion_task in tasks:
-            if 'Dia' in notion_task.get('nome', '').lower() and 'sem' in notion_task.get('nome', '').lower():
+            if 'Dia' in notion_task.get('nome', '').lower() or 'sem' in notion_task.get('nome', '').lower():
                 complete_task(notion_task['id'], NOTION_TOKEN)
                 print(f"Tarefa '{notion_task['nome']}' marcada como completa no Notion ✅")
 
