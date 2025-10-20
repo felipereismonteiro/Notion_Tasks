@@ -17,7 +17,7 @@ required = {
     "USER_ID": USER_ID
 }
 
-today = datetime.now(timezone.utc).date().isoformat()
+today = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
 
 missing = [name for name, value in required.items() if not value]
 if missing:

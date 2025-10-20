@@ -2,6 +2,7 @@ from notion_utils import get_tasks, complete_task
 from habitica.completed_tasks import get_completed_habits
 import os
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 DATABASE_ID = os.getenv("DATABASE_ID")
@@ -43,11 +44,17 @@ for task in completed_tasks:
                 complete_task(notion_task['id'], NOTION_TOKEN)
                 print(f"Tarefa '{notion_task['nome']}' marcada como completa no Notion ✅")
 
-    if (datetime.utcfromtimestamp(task["history"][-1]["date"]/1000).date() == date.today()
-            and task["completed"] == True):
+    habitica_date = (
+        datetime.utcfromtimestamp(task["history"][-1]["date"] / 1000)
+        .astimezone(ZoneInfo("America/Sao_Paulo"))
+        .date()
+    )
+    today_brt = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+
+    if habitica_date == today_brt and task.get("completed") is True:
         for notion_task in tasks:
-            if notion_task['nome'] == task.get('text'):
-                complete_task(notion_task['id'], NOTION_TOKEN)
+            if notion_task.get("nome") == task.get("text"):
+                complete_task(notion_task["id"], NOTION_TOKEN)
                 print(f"Tarefa '{notion_task['nome']}' marcada como completa no Notion ✅")
 
 print("Sincronização concluída.")

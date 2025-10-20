@@ -3,6 +3,7 @@ import dotenv
 import requests
 from datetime import timezone
 from datetime import datetime
+from zoneinfo import ZoneInfo
 dotenv.load_dotenv()
 
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
@@ -35,7 +36,7 @@ def get_tasks(database_id, notion_token, filters=None, page_size=100):
     payload = {"page_size": page_size}
 
     if filters is None:
-        today = datetime.now(timezone.utc).date().isoformat()
+        today = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
         filters = {
             "and": [
                 {
