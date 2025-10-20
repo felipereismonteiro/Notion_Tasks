@@ -3,12 +3,13 @@ name: Sync Notion
 on:
   schedule:
     # roda todo dia às 22h30 UTC−3 (Brasil) → 01h30 UTC
-    - cron: "0 0 * * *"
+    - cron: "30 0 * * *"
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    name: Execução principal
     steps:
       - uses: actions/checkout@v4
 
@@ -18,21 +19,56 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run sync script
+        id: run_sync
+        continue-on-error: true   # <-- não interrompe o workflow se falhar
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           DATABASE_ID: ${{ secrets.DATABASE_ID }}
           USER_ID: ${{ secrets.USER_ID }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
+          echo "🚀 Iniciando sincronização..."
           python - <<'PY'
           from datetime import datetime
           import os, sys, subprocess
           from zoneinfo import ZoneInfo
           print("UTC now: ", datetime.utcnow().isoformat())
           print("BRT now: ", datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
-          sys.exit(subprocess.call(["python", "main.py"]))
+          code = subprocess.call(["python", "main.py"])
+          if code != 0:
+              print("❌ Falha na execução principal (exit code:", code, ")")
+          else:
+              print("✅ Execução concluída com sucesso.")
+          sys.exit(code)
           PY
+
+  retry:
+    needs: sync
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    name: Reexecução após falha
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Retry sync after 2 min delay
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATABASE_ID: ${{ secrets.DATABASE_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          echo "⚠️ Primeira tentativa falhou, aguardando 5 minutos antes de tentar novamente..."
+          sleep 300
+          echo "🔁 Tentando novamente..."
+          python main.py || echo "❌ Segunda tentativa também falhou."
