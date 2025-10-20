@@ -36,19 +36,3 @@ def get_completed_habits():
     else:
         print(f"Erro ao buscar hábitos: {response.text}")
         return None
-
-tasks = get_completed_habits().get("data")
-
-for task in tasks:
-    history = task.get("history", [])
-    task_name = task.get("text")
-    task_description = task.get("notes", "")
-    print(f"Hábito: {task_name} - {task_description} - {history}")
-    for entry in history:
-        date_timestamp = entry.get("date")
-        date = datetime.fromtimestamp(date_timestamp / 1000).date()
-        if date == today:
-            print(f"  - Completado em: {date}")
-
-
-
