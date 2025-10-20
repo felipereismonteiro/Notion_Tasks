@@ -28,7 +28,6 @@ print("Tarefas pendentes no Notion para hoje:")
 for task in tasks:
     print(f"- {task['nome']} (ID: {task['id']})")
 completed_tasks = get_completed_habits()
-print(F"COMPLETED TASKS {completed_tasks}")
 print("----------------------------------------")
 
 print("Sincronizando tarefas completadas do Habitica com o Notion...")
