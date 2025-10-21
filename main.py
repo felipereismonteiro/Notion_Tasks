@@ -33,7 +33,7 @@ print("----------------------------------------")
 print("Sincronizando tarefas completadas do Habitica com o Notion...")
 
 for task in completed_tasks:
-    if task.get('type') == 'todo' and task.get('completed'):
+    if task.get('type') == 'todo' or "Semanalmente" in task.get('text') and task.get('completed'):
         task_founded = get_tasks(DATABASE_ID, NOTION_TOKEN,
                 filters = {
                 "property": "🐈 Sistema",
