@@ -1,7 +1,7 @@
 import os
 import dotenv
 import requests
-from datetime import timezone
+from datetime import timezone, timedelta
 from datetime import datetime
 from zoneinfo import ZoneInfo
 dotenv.load_dotenv()
@@ -110,3 +110,87 @@ def complete_task(task_id, notion_token):
         print("Erro ao atualizar tarefa no Notion:", response.status_code, response.text)
         return False
     return True
+
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+import requests
+
+def criar_tarefas(notion_token):
+    """
+    Insere 30 novas tasks de limpeza no Notion.
+    """
+    url = "https://api.notion.com/v1/pages"
+    headers = {
+        "Authorization": f"Bearer {notion_token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
+    descriptions = [
+        "Melhora a concentração e o foco nas tarefas diárias.",
+        "Aumenta a autoestima e a confiança pessoal.",
+        "Promove relacionamentos mais saudáveis e reais.",
+        "Reduz a ansiedade e o estresse relacionados ao vício.",
+        "Melhora a qualidade do sono e o descanso.",
+        "Aumenta a energia e a motivação para atividades produtivas.",
+        "Desenvolve maior autocontrole e disciplina.",
+        "Melhora a saúde mental e emocional.",
+        "Aumenta a produtividade no trabalho ou estudos.",
+        "Promove uma visão mais positiva da sexualidade.",
+        "Reduz sentimentos de culpa e vergonha.",
+        "Melhora a capacidade de lidar com emoções difíceis.",
+        "Aumenta o tempo disponível para hobbies e interesses pessoais.",
+        "Promove uma vida social mais ativa e satisfatória.",
+        "Reduz o risco de desenvolver problemas de saúde relacionados ao vício.",
+        "Melhora a clareza mental e a tomada de decisões.",
+        "Aumenta a sensação de realização pessoal.",
+        "Promove hábitos de vida mais saudáveis em geral.",
+        "Reduz a dependência de estímulos artificiais para prazer.",
+        "Melhora a conexão consigo mesmo e com os outros.",
+        "Aumenta a resiliência emocional diante de desafios.",
+        "Promove uma atitude mais positiva em relação à vida.",
+        "Reduz o tempo gasto em atividades improdutivas.",
+        "Melhora a capacidade de concentração em tarefas importantes.",
+        "Aumenta a sensação de controle sobre a própria vida.",
+        "Promove uma maior apreciação pelas experiências reais.",
+        "Reduz o impacto negativo do vício na vida cotidiana.",
+        "Melhora a saúde física geral através de melhores hábitos de vida.",
+        "Aumenta a autocompaixão e o cuidado pessoal.",
+        "Promove um senso renovado de propósito e direção na vida."
+    ]
+
+    base_date = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+
+    for index, desc in enumerate(descriptions, start=1):
+        today_deadline = (base_date + timedelta(days=index - 1)).isoformat()
+
+        payload = {
+            "parent": {"database_id": "28a2d519d27e800a9497c0ac949bd784"},
+            "icon": {
+                "type": "emoji",
+                "emoji": "🚫"
+            },
+            "properties": {
+                "🐈 Sistema": {
+                    "title": [
+                        {"text": {"content": f" Dia {index} sem Pornografia"}}
+                    ]
+                },
+                "🍀 Descrição": {
+                    "rich_text": [
+                        {"text": {"content": desc}}
+                    ]
+                },
+                "✅ Status": {"checkbox": False},
+                "📅 Deadline": {"date": {"start": today_deadline}},
+                "Metas": {
+                    "relation": [{"id": "28a2d519d27e804194b9f5283a4f950a"}]
+                }
+            }
+        }
+
+        res = requests.post(url, headers=headers, json=payload)
+        if res.status_code != 200:
+            print(f"Erro no dia {index}: {res.status_code} -> {res.text}")
+        else:
+            print(f"Tarefa do dia {index} criada com sucesso.")
