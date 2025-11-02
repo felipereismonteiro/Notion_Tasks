@@ -38,7 +38,7 @@ def get_tasks(database_id, notion_token, filters=None, page_size=100):
         payload["filter"] = filters
 
     headers_to_use = headers or {
-        "Authorization": f"Bearer {NOTION_TOKEN}",
+        "Authorization": f"Bearer {notion_token}",
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28"
     }
@@ -174,3 +174,49 @@ def create_clean_tasks(notion_token):
             print(f"Erro no dia {index}: {res.status_code} -> {res.text}")
         else:
             print(f"Tarefa do dia {index} criada com sucesso.")
+
+def create_one_month_daily_tasks_based_on_today(notion_token, taskname, description, meta_relation_id, database_id):
+    """
+    Insere 30 novas tasks diárias no Notion com base na data de hoje.
+    """
+    url = "https://api.notion.com/v1/pages"
+    headers = {
+        "Authorization": f"Bearer {notion_token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
+    base_date = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+    for index in range(1, 31):
+        today_deadline = (base_date + timedelta(days=index - 1)).isoformat()
+
+        payload = {
+            "parent": {"database_id": database_id},
+            "icon": {
+                "type": "emoji",
+                "emoji": "📅"
+            },
+            "properties": {
+                "🐈 Sistema": {
+                    "title": [
+                        {"text": {"content": f"{taskname}"}}
+                    ]
+                },
+                "🍀 Descrição": {
+                    "rich_text": [
+                        {"text": {"content": description}}
+                    ]
+                },
+                "✅ Status": {"checkbox": False},
+                "📅 Deadline": {"date": {"start": today_deadline}},
+                "Metas": {
+                    "relation": [{"id": meta_relation_id}]
+                }
+            }
+        }
+
+        res = requests.post(url, headers=headers, json=payload)
+        if res.status_code != 200:
+            print(f"Erro no dia {index}: {res.status_code} -> {res.text}")
+        else:
+            print(f"Tarefa diária do dia {index} criada com sucesso.")
