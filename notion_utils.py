@@ -175,7 +175,7 @@ def create_clean_tasks(notion_token):
         else:
             print(f"Tarefa do dia {index} criada com sucesso.")
 
-def create_one_month_daily_tasks_based_on_today(notion_token, taskname, description, meta_relation_id, database_id):
+def create_one_month_daily_tasks_based_on_today(notion_token, taskname, description, meta_relation_id, database_id, inic, fim):
     """
     Insere 30 novas tasks diárias no Notion com base na data de hoje.
     """
@@ -187,7 +187,7 @@ def create_one_month_daily_tasks_based_on_today(notion_token, taskname, descript
     }
 
     base_date = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
-    for index in range(1, 31):
+    for index in range(inic, fim):
         today_deadline = (base_date + timedelta(days=index - 1)).isoformat()
 
         payload = {
