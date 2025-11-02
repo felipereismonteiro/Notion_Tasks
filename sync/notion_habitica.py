@@ -36,8 +36,8 @@ def fetch_and_print_tasks(database_id, notion_token, filters=None):
     return notion_tasks
 
 def sync_tasks(notion_tasks):
-    print(f"Sincronizando tarefas do notion com o habitica...")
-    synked_daily_tasks = []
+    print("Sincronizando tarefas do notion com o habitica...")
+    synced_daily_tasks = []
 
     for task in notion_tasks:
         task_name = task['nome']
@@ -45,62 +45,47 @@ def sync_tasks(notion_tasks):
         task_deadline = task['deadline']
         deadline_date = datetime.fromisoformat(task_deadline).date()
 
-        if "Diária" not in task_name:
-            if task_name in synked_daily_tasks:
-                print(f"  - Tarefa '{task_name}' já sincronizada. Pulando...")
-                continue
-            print(f"  - Adicionando tarefa '{task_name}' ao Habitica...")
-            habitica_task_payload = {
-                "type": "todo",
-                "text": task_name,
-                "notes": task_desc,
-                "date": deadline_date.isoformat(),
-                "difficulty": "hard"
-            }
-            habitica_headers = {
-                "x-api-user": USER_ID,
-                "x-api-key": API_KEY,
-                "x-client": f"{USER_ID}-notion-sync",
-                "Content-Type": "application/json"
-            }
-
-            while True:
-                response = requests.post("https://habitica.com/api/v3/tasks/user", json=habitica_task_payload,
-                                         headers=habitica_headers)
-                if response.status_code == 201:
-                    break
-                print(f"    ❌ Erro ao adicionar tarefa '{task_name}' ao Habitica: {response.status_code} {response.text}. Tentando novamente em 5s...")
-                time.sleep(5)
-                if response.status_code == 201:
-                    print(f"    ✅ Tarefa '{task_name}' adicionada com sucesso ao Habitica.")
-                    synked_daily_tasks.append(task_name)
-            else:
-                print(
-                    f"    ❌ Erro ao adicionar tarefa '{task_name}' ao Habitica: {response.status_code} {response.text}")
-            continue
+        habitica_headers = {
+            "x-api-user": USER_ID,
+            "x-api-key": API_KEY,
+            "x-client": f"{USER_ID}-notion-sync",
+            "Content-Type": "application/json"
+        }
 
         if "Diária" in task_name:
-            print(f"  - Tarefa '{task_name}' é uma diária. Adicionando tarefa diária ao Habitica...")
-            habitica_task_payload = {
-                "type": "daily",
-                "text": task_name,
-                "notes": task_desc,
-                "date": deadline_date.isoformat()
-            }
-            habitica_headers = {
-                "x-api-user": USER_ID,
-                "x-api-key": API_KEY,
-                "x-client": f"{USER_ID}-notion-sync",
-                "Content-Type": "application/json"
-            }
-            response = requests.post("https://habitica.com/api/v3/tasks/user", json=habitica_task_payload,
+            task_type = "daily"
+        else:
+            task_type = "todo"
+
+        if task_name in synced_daily_tasks:
+            print(f"  - Tarefa '{task_name}' já sincronizada. Pulando...")
+            continue
+
+        print(f"  - Adicionando tarefa '{task_name}' ({task_type}) ao Habitica...")
+
+        habitica_task_payload = {
+            "type": task_type,
+            "text": task_name,
+            "notes": task_desc,
+            "date": deadline_date.isoformat(),
+        }
+
+        if task_type == "todo":
+            habitica_task_payload["difficulty"] = "hard"
+
+        for attempt in range(99):
+            response = requests.post("https://habitica.com/api/v3/tasks/user",
+                                     json=habitica_task_payload,
                                      headers=habitica_headers)
             if response.status_code == 201:
-                print(f"    ✅ Tarefa diária '{task_name}' adicionada com sucesso ao Habitica.")
+                print(f"    ✅ Tarefa '{task_name}' adicionada com sucesso ao Habitica.")
+                synced_daily_tasks.append(task_name)
+                break
             else:
-                print(
-                    f"    ❌ Erro ao adicionar tarefa diária '{task_name}' ao Habitica: {response.status_code} {response.text}")
-            continue
+                print(f"    ❌ Erro ({response.status_code}): {response.text}. Tentando novamente ({attempt + 1}/3)...")
+                time.sleep(5)
+        else:
+            print(f"    ❌ Falha ao adicionar '{task_name}' após 3 tentativas.")
 
 def clean_all_habitica():
     print("Limpando todas as tarefas do Habitica...")
