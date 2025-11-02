@@ -1,24 +1,8 @@
-import os
-import dotenv
-import requests
-from datetime import timezone, timedelta
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import requests
+import dotenv
 dotenv.load_dotenv()
-
-NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-DATABASE_ID = os.getenv("DATABASE_ID")
-
-required = {
-    "NOTION_TOKEN": NOTION_TOKEN,
-    "DATABASE_ID": DATABASE_ID
-}
-
-missing = [name for name, value in required.items() if not value]
-if missing:
-    print("⚠️ Variáveis ausentes:", ", ".join(missing))
-else:
-    print("✅ Todas as variáveis de ambiente foram carregadas corretamente.")
 
 def get_tasks(database_id, notion_token, filters=None, page_size=100):
     """
@@ -111,11 +95,7 @@ def complete_task(task_id, notion_token):
         return False
     return True
 
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-import requests
-
-def criar_tarefas(notion_token):
+def create_clean_tasks(notion_token):
     """
     Insere 30 novas tasks de limpeza no Notion.
     """
